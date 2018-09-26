@@ -11,7 +11,7 @@ import difflib
 app = Celery('tasks', broker='redis://localhost:6379/0')
 
 # mysql配置
-db = pymysql.connect("localhost", "root", "1234", "infocollecting")
+db = pymysql.connect("localhost", "root", "1234", "CrawlProject")
 cursor = db.cursor()
 #筛选内容
 def check_content(url, text):
@@ -111,7 +111,7 @@ def diff_file(lines1, lines2):
     return diff_text
 
 def diff(Company,new_html_content):
-    sql = "SELECT Content FROM WebInfo WHERE Company = '%s'" % (Company)
+    sql = "SELECT Content FROM NewsWebInfo WHERE Company = '%s'" % (Company)
     try:
         # 执行sql语句
         cursor.execute(sql)
@@ -123,8 +123,9 @@ def diff(Company,new_html_content):
         db.rollback()
         old_html_content=""
     if (old_html_content != None):
-        diff_text = str(new_html_content).replace("'", "&acute;")
-        sql = "UPDATE WebInfo SET Content = '%s' WHERE Company = '%s' " %(diff_text,Company)
+        diff_text = diff_file(old_html_content,new_html_content)
+        diff_text = str(diff_text).replace("'", "&acute;")
+        sql = "UPDATE NewsWebInfo SET Content = '%s' WHERE Company = '%s' " %(diff_text,Company)
         try:
         # 执行sql语句
             cursor.execute(sql)
@@ -137,7 +138,7 @@ def diff(Company,new_html_content):
         return diff_text
     else:
         diff_text = new_html_content
-        sql = "INSERT INTO WebInfo(Company,Content) VALUES ('%s','%s')" % (Company,pymysql.escape_string(diff_text))
+        sql = "INSERT INTO NewsWebInfo(Company,Content) VALUES ('%s','%s')" % (Company,pymysql.escape_string(diff_text))
         try:
             # 执行sql语句
             cursor.execute(sql)
@@ -169,7 +170,7 @@ def extract(Company,crawlUrl,category):
                     if check_pass:
                         url = complement_url(url, crawlUrl)
                         print(url+"    "+text)
-                        sql = "INSERT INTO InfoTable(Company, Url, Category, Content) VALUES ('%s', '%s', '%s','%s')" % (Company, url ,category,text)
+                        sql = "INSERT INTO NewsInfoTable(Company, Url, Category, Content) VALUES ('%s', '%s', '%s','%s')" % (Company, url ,category,text)
                         try:
                             # 执行sql语句
                             cursor.execute(sql)
@@ -200,8 +201,23 @@ if __name__ == '__main__':
     #    except:
         # 发生错误时回滚
     #        db.rollback()
-    for i in range(0,len(list_company)):
-       extract(list_company[i],list_url[i],list_category[i])
+    sql = "SELECT * FROM NewsCompanyInfo"
+    try:
+        # 执行sql语句
+        cursor.execute(sql)
+        # 获取所有记录列表
+        results = cursor.fetchall()
+        for row in results:
+            list_company = row[0]
+            list_url = row[1]
+            list_category = row[2]
+            print(list_company,list_url,list_category)
+            extract(list_company, list_url, list_category)
+    except:
+        # 发生错误时回滚
+        db.rollback()
+        print("234567876543212345678765432")
+
     db.close()
 
 # 医疗器械 区块链 人工智能 新兴产业
