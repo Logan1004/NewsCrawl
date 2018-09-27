@@ -217,7 +217,7 @@ if __name__ == '__main__':
     #    except:
         # 发生错误时回滚
     #        db.rollback()
-    sql = "SELECT * FROM NewsCompanyInfovv"
+    sql = "SELECT * FROM NewsCompanyInfo"
     try:
         # 执行sql语句
         cursor.execute(sql)
