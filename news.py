@@ -3,10 +3,11 @@ import lxml
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import pymysql
-from list import *
+from mailbot import *
 from celery import Celery
 from celery.schedules import crontab
 import difflib
+
 
 app = Celery('tasks', broker='redis://localhost:6379/0')
 
@@ -121,6 +122,10 @@ def diff(Company,new_html_content):
     except:
         # 发生错误时回滚
         db.rollback()
+        message = "公司网页信息获取异常！出错位置：2 出错文件：news.py"
+        send_mail('1585084146@qq.com', message)
+        send_mail('1264160868@qq.com', message)
+        send_mail('1228974364@qq.com', message)
         old_html_content=""
     if (old_html_content != None):
         diff_text = diff_file(old_html_content,new_html_content)
@@ -135,6 +140,10 @@ def diff(Company,new_html_content):
         # 发生错误时回滚
             db.rollback()
             print("cddcd")
+            message = "公司网页更新获取异常！出错位置：3 出错文件：news.py"
+            send_mail('1585084146@qq.com', message)
+            send_mail('1264160868@qq.com', message)
+            send_mail('1228974364@qq.com', message)
         return diff_text
     else:
         diff_text = new_html_content
@@ -148,6 +157,10 @@ def diff(Company,new_html_content):
         except:
             # 发生错误时回滚
             db.rollback()
+            message = "公司网页插入数据库异常！出错位置：4 出错文件：news.py"
+            send_mail('1585084146@qq.com', message)
+            send_mail('1264160868@qq.com', message)
+            send_mail('1228974364@qq.com', message)
             print("234567876543212345678765432")
         return diff_text
 
@@ -179,7 +192,10 @@ def extract(Company,crawlUrl,category):
                         except:
                             # 发生错误时回滚
                             db.rollback()
-                            print("234567876543212345678765432")
+                            message = "公司信息插入数据库异常！出错位置：5 出错文件：news.py"
+                            send_mail('1585084146@qq.com', message)
+                            send_mail('1264160868@qq.com', message)
+                            send_mail('1228974364@qq.com', message)
     except Exception as e:
         try:
             print("#{id} {name} {site} {err}")
@@ -201,11 +217,10 @@ if __name__ == '__main__':
     #    except:
         # 发生错误时回滚
     #        db.rollback()
-    sql = "SELECT * FROM NewsCompanyInfo"
+    sql = "SELECT * FROM NewsCompanyInfovv"
     try:
         # 执行sql语句
         cursor.execute(sql)
-        # 获取所有记录列表
         results = cursor.fetchall()
         for row in results:
             list_company = row[0]
@@ -216,8 +231,10 @@ if __name__ == '__main__':
     except:
         # 发生错误时回滚
         db.rollback()
-        print("234567876543212345678765432")
-
+        message = "公司信息获取异常！出错位置：1 出错文件：news.py"
+        send_mail('1585084146@qq.com', message)
+        send_mail('1264160868@qq.com', message)
+        send_mail('1228974364@qq.com', message)
     db.close()
 
 # 医疗器械 区块链 人工智能 新兴产业
