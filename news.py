@@ -9,10 +9,10 @@ from celery.schedules import crontab
 import difflib
 
 
-app = Celery('tasks', broker='redis://localhost:6379/0')
+#app = Celery('tasks', broker='redis://localhost:6379/0')
 
 # mysql配置
-db = pymysql.connect("localhost", "root", "1234", "CrawlProject")
+db = pymysql.connect("139.199.226.149", "root", "test", "CrawlProject")
 cursor = db.cursor()
 #筛选内容
 def check_content(url, text):
@@ -128,6 +128,7 @@ def diff(Company,new_html_content):
         send_mail('1228974364@qq.com', message)
         old_html_content=""
     if (old_html_content != None):
+        print("cddcd")
         diff_text = diff_file(old_html_content,new_html_content)
         diff_text = str(diff_text).replace("'", "&acute;")
         sql = "UPDATE NewsWebInfo SET Content = '%s' WHERE Company = '%s' " %(diff_text,Company)
@@ -139,7 +140,7 @@ def diff(Company,new_html_content):
         except:
         # 发生错误时回滚
             db.rollback()
-            print("cddcd")
+
             message = "公司网页更新获取异常！出错位置：3 出错文件：news.py"
             send_mail('1585084146@qq.com', message)
             send_mail('1264160868@qq.com', message)
@@ -147,6 +148,7 @@ def diff(Company,new_html_content):
         return diff_text
     else:
         diff_text = new_html_content
+        #print(diff_text)
         sql = "INSERT INTO NewsWebInfo(Company,Content) VALUES ('%s','%s')" % (Company,pymysql.escape_string(diff_text))
         try:
             # 执行sql语句
